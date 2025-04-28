@@ -13,6 +13,7 @@ use DB;
 
 use App\Models\Users\Subjects;
 use App\Models\Users\User;
+use App\Http\Requests\UserStoreRequest; // FormRequestをインポート
 
 class RegisteredUserController extends Controller
 {
@@ -30,12 +31,12 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\UserStoreRequest  $request  // 変更点
      * @return \Illuminate\Http\RedirectResponse
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request)
+    public function store(UserStoreRequest $request) // 変更点
     {
         DB::beginTransaction();
         try{
