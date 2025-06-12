@@ -7,9 +7,27 @@
           <div>
           </div>
           <div>
-            <span class="edit-modal-open" post_title="{{ $post->post_title }}" post_body="{{ $post->post }}" post_id="{{ $post->id }}">編集</span>
-            <a href="{{ route('post.delete', ['id' => $post->id]) }}">削除</a>
-          </div>
+          @if (Auth::id() === $post->user_id)
+    {{-- タイトルのエラー表示 --}}
+    @if ($errors->has('post_title'))
+        <div class="text-danger">{{ $errors->first('post_title') }}</div>
+    @endif
+    {{-- 内容（post_body）のエラー表示 --}}
+    @if ($errors->has('post_body'))
+        <div class="text-danger">{{ $errors->first('post_body') }}</div>
+    @endif
+  <span class="edit-modal-open"
+        post_title="{{ $post->post_title }}"
+        post_body="{{ $post->post }}"
+        post_id="{{ $post->id }}">
+    編集
+  </span>
+  <!-- 削除ボタンはリンクじゃなくてモーダルを開くボタンに -->
+  <span class="delete-modal-open" data-post-id="{{ $post->id }}">
+    削除
+  </span>
+@endif
+</div>
         </div>
 
         <div class="contributor d-flex">
@@ -69,6 +87,18 @@
         </div>
       </div>
       {{ csrf_field() }}
+    </form>
+  </div>
+</div>
+<div class="modal js-delete-modal" style="display:none;">
+  <div class="modal__bg js-delete-modal-close"></div>
+  <div class="modal__content">
+    <p>本当に削除しますか？</p>
+    <form id="deleteForm" method="POST" action="">
+      @csrf
+      @method('DELETE') {{-- DELETEメソッドにしたい場合 --}}
+      <button type="submit" class="btn btn-danger">はい</button>
+      <button type="button" class="js-delete-modal-close btn btn-secondary">いいえ</button>
     </form>
   </div>
 </div>

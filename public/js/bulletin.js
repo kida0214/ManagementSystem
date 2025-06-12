@@ -48,18 +48,32 @@ $(function () {
     });
   });
 
-  $('.edit-modal-open').on('click',function(){
+  $('.edit-modal-open').on('click', function () {
     $('.js-modal').fadeIn();
     var post_title = $(this).attr('post_title');
     var post_body = $(this).attr('post_body');
     var post_id = $(this).attr('post_id');
     $('.modal-inner-title input').val(post_title);
-    $('.modal-inner-body textarea').text(post_body);
+    $('.modal-inner-body textarea').val(post_body);
     $('.edit-modal-hidden').val(post_id);
     return false;
   });
   $('.js-modal-close').on('click', function () {
     $('.js-modal').fadeOut();
+    return false;
+  });
+
+  // ここから追加：削除モーダル開く
+  $('.delete-modal-open').on('click', function () {
+    $('.js-delete-modal').fadeIn();
+    var postId = $(this).data('post-id');
+    $('#deleteForm').attr('action', '/post/delete/' + postId);
+    return false;
+  });
+
+  // 削除モーダル閉じる
+  $('.js-delete-modal-close').on('click', function () {
+    $('.js-delete-modal').fadeOut();
     return false;
   });
 

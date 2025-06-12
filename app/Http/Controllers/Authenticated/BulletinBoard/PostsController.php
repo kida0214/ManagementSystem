@@ -11,7 +11,7 @@ use App\Models\Posts\PostComment;
 use App\Models\Posts\Like;
 use App\Models\Users\User;
 use App\Http\Requests\BulletinBoard\PostFormRequest;
-use Auth;
+use Illuminate\Support\Facades\Auth;//編集削除機能で追記した項目
 
 class PostsController extends Controller
 {
@@ -57,18 +57,39 @@ class PostsController extends Controller
         return redirect()->route('post.show');
     }
 
-    public function postEdit(Request $request){
-        Post::where('id', $request->post_id)->update([
+    public function postEdit(PostFormRequest $request){
+        $request->validate([
+            'post_id' => 'required|integer|exists:posts,id',
+            'post_title' => 'required|string|max:255',
+            'post_body' => 'nullable|string',
+        ]);
+
+        $post = Post::findOrFail($request->post_id);
+
+        if ($post->user_id !== Auth::id()) {
+            abort(403, 'この操作は許可されていません。');
+        }
+
+        $post->update([
             'post_title' => $request->post_title,
             'post' => $request->post_body,
         ]);
+
         return redirect()->route('post.detail', ['id' => $request->post_id]);
     }
 
+
     public function postDelete($id){
-        Post::findOrFail($id)->delete();
+        $post = Post::findOrFail($id);
+        // ログインユーザーが投稿の所有者か確認
+        if ($post->user_id !== Auth::id()) {
+            abort(403, 'この操作は許可されていません。');
+        }
+
+        $post->delete();
         return redirect()->route('post.show');
     }
+
     public function mainCategoryCreate(Request $request){
         MainCategory::create(['main_category' => $request->main_category_name]);
         return redirect()->route('post.input');
