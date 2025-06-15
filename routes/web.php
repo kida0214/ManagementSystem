@@ -52,7 +52,8 @@ Route::group(['middleware' => 'auth'], function(){
             Route::post('create/sub_category', [PostsController::class, 'subCategoryCreate'])->name('sub.category.create');
             Route::get('bulletin_board/post/{id}', [PostsController::class, 'postDetail'])->name('post.detail');
             Route::post('bulletin_board/edit', [PostsController::class, 'postEdit'])->name('post.edit');
-            Route::get('bulletin_board/delete/{id}', [PostsController::class, 'postDelete'])->name('post.delete');
+            // web.php
+            Route::delete('/bulletin_board/delete/{id}', [PostsController::class, 'postDelete'])->name('post.delete');
             Route::post('comment/create', [PostsController::class, 'commentCreate'])->name('comment.create');
             Route::post('like/post/{id}', [PostsController::class, 'postLike'])->name('post.like');
             Route::post('unlike/post/{id}', [PostsController::class, 'postUnLike'])->name('post.unlike');

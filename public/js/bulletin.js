@@ -67,7 +67,7 @@ $(function () {
   $('.delete-modal-open').on('click', function () {
     $('.js-delete-modal').fadeIn();
     var postId = $(this).data('post-id');
-    $('#deleteForm').attr('action', '/post/delete/' + postId);
+    $('#deleteForm').attr('action', '/bulletin_board/delete/' + postId);
     return false;
   });
 
