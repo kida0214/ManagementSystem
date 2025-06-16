@@ -19,16 +19,18 @@ class Post extends Model
         return $this->belongsTo('App\Models\Users\User');
     }
 
-    public function postComments(){
+    public function postComments()
+    {
         return $this->hasMany('App\Models\Posts\PostComment');
     }
 
-    public function subCategories(){
-        // リレーションの定義
+    // 投稿へのいいね
+    public function likes()
+    {
+        // Likeモデルの外部キーはlike_post_id、Postの主キーはid
+        return $this->hasMany('App\Models\Posts\Like', 'like_post_id', 'id');
     }
 
-    // コメント数
-    public function commentCounts($post_id){
-        return Post::with('postComments')->find($post_id)->postComments();
-    }
+    // 必要に応じて他のリレーションもここに
+
 }

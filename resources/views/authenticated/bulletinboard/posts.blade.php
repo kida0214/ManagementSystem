@@ -9,36 +9,86 @@
       <div class="post_bottom_area d-flex">
         <div class="d-flex post_status">
           <div class="mr-5">
-            <i class="fa fa-comment"></i><span class=""></span>
+            <i class="fa fa-comment"></i>
+            <span>{{ $post->postComments->count() }}</span>
           </div>
           <div>
             @if(Auth::user()->is_Like($post->id))
-            <p class="m-0"><i class="fas fa-heart un_like_btn" post_id="{{ $post->id }}"></i><span class="like_counts{{ $post->id }}"></span></p>
+            <p class="m-0">
+              <i class="fas fa-heart like-btn text-danger" data-post-id="{{ $post->id }}"></i>
+              <span id="like-count-{{ $post->id }}">{{ $post->likes->count() }}</span>
+            </p>
             @else
-            <p class="m-0"><i class="fas fa-heart like_btn" post_id="{{ $post->id }}"></i><span class="like_counts{{ $post->id }}"></span></p>
+            <p class="m-0">
+              <i class="far fa-heart like-btn" data-post-id="{{ $post->id }}"></i>
+              <span id="like-count-{{ $post->id }}">{{ $post->likes->count() }}</span>
+            </p>
             @endif
           </div>
+
         </div>
       </div>
     </div>
     @endforeach
   </div>
+
   <div class="other_area border w-25">
     <div class="border m-4">
-      <div class=""><a href="{{ route('post.input') }}">投稿</a></div>
-      <div class="">
-        <input type="text" placeholder="キーワードを検索" name="keyword" form="postSearchRequest">
-        <input type="submit" value="検索" form="postSearchRequest">
-      </div>
-      <input type="submit" name="like_posts" class="category_btn" value="いいねした投稿" form="postSearchRequest">
-      <input type="submit" name="my_posts" class="category_btn" value="自分の投稿" form="postSearchRequest">
-      <ul>
-        @foreach($categories as $category)
-        <li class="main_categories" category_id="{{ $category->id }}"><span>{{ $category->main_category }}<span></li>
-        @endforeach
-      </ul>
+      <div><a href="{{ route('post.input') }}">投稿</a></div>
+
+      <form action="{{ route('post.show') }}" method="get" id="postSearchRequest">
+        <div>
+          <input type="text" placeholder="キーワードを検索" name="keyword">
+          <input type="submit" value="検索">
+        </div>
+        <input type="submit" name="like_posts" class="category_btn" value="いいねした投稿">
+        <input type="submit" name="my_posts" class="category_btn" value="自分の投稿">
+
+        <ul>
+          @foreach($categories as $category)
+          <li class="main_categories" data-category-id="{{ $category->id }}">
+            <button type="submit" name="category_word" value="{{ $category->main_category }}" class="btn btn-link p-0">
+              {{ $category->main_category }}
+            </button>
+          </li>
+          @endforeach
+        </ul>
+      </form>
     </div>
   </div>
-  <form action="{{ route('post.show') }}" method="get" id="postSearchRequest"></form>
 </div>
+
+{{-- JavaScript for Like --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const postId = this.dataset.postId;
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch('{{ route("post.toggleLike") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                body: JSON.stringify({ post_id: postId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const countSpan = document.querySelector(`#like-count-${postId}`);
+                countSpan.textContent = data.like_count;
+
+                if (data.liked) {
+                    this.classList.remove('far');
+                    this.classList.add('fas', 'text-danger');
+                } else {
+                    this.classList.remove('fas', 'text-danger');
+                    this.classList.add('far');
+                }
+            });
+        });
+    });
+});
+</script>
 </x-sidebar>

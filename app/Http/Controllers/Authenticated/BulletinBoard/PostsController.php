@@ -38,6 +38,35 @@ class PostsController extends Controller
         return view('authenticated.bulletinboard.posts', compact('posts', 'categories', 'like', 'post_comment'));
     }
 
+    public function toggleLike(Request $request)
+{
+    $post_id = $request->post_id;
+    $user = Auth::user();
+
+    $post = Post::findOrFail($post_id);
+    $existingLike = Like::where('like_user_id', $user->id)
+                        ->where('like_post_id', $post_id)
+                        ->first();
+
+    if ($existingLike) {
+        $existingLike->delete();
+        $liked = false;
+    } else {
+        Like::create([
+            'like_user_id' => $user->id,
+            'like_post_id' => $post_id,
+        ]);
+        $liked = true;
+    }
+
+    $likeCount = Like::where('like_post_id', $post_id)->count();
+
+    return response()->json([
+        'liked' => $liked,
+        'like_count' => $likeCount,
+    ]);
+}
+
     public function postDetail($post_id){
         $post = Post::with('user', 'postComments')->findOrFail($post_id);
         return view('authenticated.bulletinboard.post_detail', compact('post'));

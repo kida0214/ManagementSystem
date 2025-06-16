@@ -45,6 +45,8 @@ Route::group(['middleware' => 'auth'], function(){
         Route::namespace('BulletinBoard')->group(function(){
             Route::get('bulletin_board/posts/{keyword?}', [PostsController::class, 'show'])->name('post.show');
             Route::get('bulletin_board/input', [PostsController::class, 'postInput'])->name('post.input');
+            // Ajaxで使用する「トグル型いいね」用ルート（追加）
+            Route::post('bulletin_board/toggle-like', [PostsController::class, 'toggleLike'])->name('post.toggleLike');
             Route::get('bulletin_board/like', [PostsController::class, 'likeBulletinBoard'])->name('like.bulletin.board');
             Route::get('bulletin_board/my_post', [PostsController::class, 'myBulletinBoard'])->name('my.bulletin.board');
             Route::post('bulletin_board/create', [PostsController::class, 'postCreate'])->name('post.create');
@@ -55,8 +57,8 @@ Route::group(['middleware' => 'auth'], function(){
             // web.php
             Route::delete('/bulletin_board/delete/{id}', [PostsController::class, 'postDelete'])->name('post.delete');
             Route::post('comment/create', [PostsController::class, 'commentCreate'])->name('comment.create');
-            Route::post('like/post/{id}', [PostsController::class, 'postLike'])->name('post.like');
-            Route::post('unlike/post/{id}', [PostsController::class, 'postUnLike'])->name('post.unlike');
+            // Route::post('like/post/{id}', [PostsController::class, 'postLike'])->name('post.like');
+            // Route::post('unlike/post/{id}', [PostsController::class, 'postUnLike'])->name('post.unlike');
         });
         Route::namespace('Users')->group(function(){
             Route::get('show/users', [UsersController::class, 'showUsers'])->name('user.show');
