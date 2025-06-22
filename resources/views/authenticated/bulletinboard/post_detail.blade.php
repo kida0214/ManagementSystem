@@ -4,30 +4,30 @@
     <div class="m-3 detail_container">
       <div class="p-3">
         <div class="detail_inner_head">
+          <div></div>
           <div>
+            @if (Auth::id() === $post->user_id)
+              {{-- タイトルのエラー表示 --}}
+              @if ($errors->has('post_title'))
+                  <div class="text-danger">{{ $errors->first('post_title') }}</div>
+              @endif
+              {{-- 内容（post_body）のエラー表示 --}}
+              @if ($errors->has('post_body'))
+                  <div class="text-danger">{{ $errors->first('post_body') }}</div>
+              @endif
+
+              <span class="edit-modal-open"
+                    post_title="{{ $post->post_title }}"
+                    post_body="{{ $post->post }}"
+                    post_id="{{ $post->id }}">
+                編集
+              </span>
+
+              <span class="delete-modal-open" data-post-id="{{ $post->id }}">
+                削除
+              </span>
+            @endif
           </div>
-          <div>
-          @if (Auth::id() === $post->user_id)
-    {{-- タイトルのエラー表示 --}}
-    @if ($errors->has('post_title'))
-        <div class="text-danger">{{ $errors->first('post_title') }}</div>
-    @endif
-    {{-- 内容（post_body）のエラー表示 --}}
-    @if ($errors->has('post_body'))
-        <div class="text-danger">{{ $errors->first('post_body') }}</div>
-    @endif
-  <span class="edit-modal-open"
-        post_title="{{ $post->post_title }}"
-        post_body="{{ $post->post }}"
-        post_id="{{ $post->id }}">
-    編集
-  </span>
-  <!-- 削除ボタンはリンクじゃなくてモーダルを開くボタンに -->
-  <span class="delete-modal-open" data-post-id="{{ $post->id }}">
-    削除
-  </span>
-@endif
-</div>
         </div>
 
         <div class="contributor d-flex">
@@ -38,9 +38,11 @@
           </p>
           <span class="ml-5">{{ $post->created_at }}</span>
         </div>
+
         <div class="detsail_post_title">{{ $post->post_title }}</div>
         <div class="mt-3 detsail_post">{{ $post->post }}</div>
       </div>
+
       <div class="p-3">
         <div class="comment_container">
           <span class="">コメント</span>
@@ -57,18 +59,27 @@
       </div>
     </div>
   </div>
+  {{-- コメント投稿フォーム --}}
   <div class="w-50 p-3">
     <div class="comment_container border m-5">
       <div class="comment_area p-3">
+      {{-- コメントのバリデーションエラー --}}
+        @if ($errors->has('comment'))
+          <div class="text-danger">{{ $errors->first('comment') }}</div>
+        @endif
         <p class="m-0">コメントする</p>
-        <textarea class="w-100" name="comment" form="commentRequest"></textarea>
-        <input type="hidden" name="post_id" form="commentRequest" value="{{ $post->id }}">
-        <input type="submit" class="btn btn-primary" form="commentRequest" value="投稿">
-        <form action="{{ route('comment.create') }}" method="post" id="commentRequest">{{ csrf_field() }}</form>
+        <form action="{{ route('comment.create') }}" method="post" id="commentRequest">
+          @csrf
+          <textarea class="w-100" name="comment">{{ old('comment') }}</textarea>
+          <input type="hidden" name="post_id" value="{{ $post->id }}">
+          <input type="submit" class="btn btn-primary" value="投稿">
+        </form>
       </div>
     </div>
   </div>
 </div>
+
+{{-- 編集モーダル --}}
 <div class="modal js-modal">
   <div class="modal__bg js-modal-close"></div>
   <div class="modal__content">
@@ -90,13 +101,15 @@
     </form>
   </div>
 </div>
+
+{{-- 削除モーダル --}}
 <div class="modal js-delete-modal" style="display:none;">
   <div class="modal__bg js-delete-modal-close"></div>
   <div class="modal__content">
     <p>本当に削除しますか？</p>
     <form id="deleteForm" method="POST" action="">
       @csrf
-      @method('DELETE') {{-- DELETEメソッドにしたい場合 --}}
+      @method('DELETE')
       <button type="submit" class="btn btn-danger">はい</button>
       <button type="button" class="js-delete-modal-close btn btn-secondary">いいえ</button>
     </form>
