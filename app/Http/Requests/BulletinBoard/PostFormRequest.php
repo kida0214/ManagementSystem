@@ -34,7 +34,7 @@ class PostFormRequest extends FormRequest
             'post_title.required' => 'タイトルは必ず入力してください。',
             'post_title.string' => 'タイトルは文字列である必要があります。',
             'post_title.max' => 'タイトルは100文字以内で入力してください。',
-            'post_body.required' => '内容は必ず入力してください。',
+            'post_body.required' => '投稿内容は必ず入力してください。',
             'post_body.string' => '内容は文字列である必要があります。',
             'post_body.max' => '最大文字数は2000文字です。',
         ];

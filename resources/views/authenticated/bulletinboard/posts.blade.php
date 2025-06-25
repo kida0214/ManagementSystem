@@ -45,14 +45,25 @@
         <input type="submit" name="my_posts" class="category_btn" value="自分の投稿">
 
         <ul>
-          @foreach($categories as $category)
-          <li class="main_categories" data-category-id="{{ $category->id }}">
-            <button type="submit" name="category_word" value="{{ $category->main_category }}" class="btn btn-link p-0">
-              {{ $category->main_category }}
-            </button>
-          </li>
-          @endforeach
-        </ul>
+  @foreach($categories as $category)
+  <li class="main_category_wrapper">
+    <div class="d-flex align-items-center justify-content-between main_category_toggle" data-category-id="{{ $category->id }}" style="cursor: pointer;">
+      <span>{{ $category->main_category }}</span>
+      <i class="arrow-icon fas fa-chevron-down" id="arrow-{{ $category->id }}"></i>
+    </div>
+
+    <ul class="sub_category_list" id="sub-list-{{ $category->id }}" style="display: none; margin-left: 1rem;">
+      @foreach($category->subCategories as $sub)
+      <li>
+        <button type="submit" name="category_word" value="{{ $sub->sub_category }}" class="btn btn-link p-0">
+          {{ $sub->sub_category }}
+        </button>
+      </li>
+      @endforeach
+    </ul>
+  </li>
+  @endforeach
+</ul>
       </form>
     </div>
   </div>
@@ -89,6 +100,30 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // いいね処理（元からある部分）...
+
+  // ▼ カテゴリ開閉処理
+  document.querySelectorAll('.main_category_toggle').forEach(toggle => {
+    toggle.addEventListener('click', function () {
+      const categoryId = this.dataset.categoryId;
+      const subList = document.getElementById(`sub-list-${categoryId}`);
+      const arrow = document.getElementById(`arrow-${categoryId}`);
+
+      if (subList.style.display === 'none' || subList.style.display === '') {
+        subList.style.display = 'block';
+        arrow.classList.remove('fa-chevron-down');
+        arrow.classList.add('fa-chevron-up');
+      } else {
+        subList.style.display = 'none';
+        arrow.classList.remove('fa-chevron-up');
+        arrow.classList.add('fa-chevron-down');
+      }
+    });
+  });
 });
 </script>
 </x-sidebar>

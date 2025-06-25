@@ -32,5 +32,8 @@ class Post extends Model
     }
 
     // 必要に応じて他のリレーションもここに
-
+    public function subCategory()
+{
+    return $this->belongsTo(\App\Models\Categories\SubCategory::class, 'post_sub_category_id');
+}
 }
