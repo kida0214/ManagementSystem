@@ -13,31 +13,52 @@ use App\Models\Users\User;
 use App\Http\Requests\BulletinBoard\PostFormRequest;
 use Illuminate\Support\Facades\Auth;//編集削除機能で追記した項目
 use App\Http\Requests\BulletinBoard\CommentFormRequest;
+use App\Http\Requests\BulletinBoard\MaincategoryFormRequest;
+use App\Http\Requests\BulletinBoard\SubcategoryFormRequest;
 
 class PostsController extends Controller
 {
-    public function show(Request $request){
-        $posts = Post::with('user', 'postComments')->get();
-        $categories = MainCategory::get();
-        $like = new Like;
-        $post_comment = new Post;
-        if(!empty($request->keyword)){
-            $posts = Post::with('user', 'postComments')
-            ->where('post_title', 'like', '%'.$request->keyword.'%')
-            ->orWhere('post', 'like', '%'.$request->keyword.'%')->get();
-        }else if($request->category_word){
-            $sub_category = $request->category_word;
-            $posts = Post::with('user', 'postComments')->get();
-        }else if($request->like_posts){
-            $likes = Auth::user()->likePostId()->get('like_post_id');
-            $posts = Post::with('user', 'postComments')
-            ->whereIn('id', $likes)->get();
-        }else if($request->my_posts){
-            $posts = Post::with('user', 'postComments')
-            ->where('user_id', Auth::id())->get();
+    public function show(Request $request)
+{
+    $query = Post::with('user', 'postComments', 'subCategory');
+
+    //キーワード検索（サブカテゴリ名と一致したらそれで絞る）
+    if ($request->filled('keyword')) {
+        $sub = SubCategory::where('sub_category', $request->keyword)->first();
+
+        if ($sub) {
+            $query->where('post_sub_category_id', $sub->id);// 完全一致したらカテゴリで絞る
+        } else {
+            $query->where(function ($q) use ($request) {
+                $q->where('post_title', 'like', '%' . $request->keyword . '%')
+                  ->orWhere('post', 'like', '%' . $request->keyword . '%');
+            });
         }
-        return view('authenticated.bulletinboard.posts', compact('posts', 'categories', 'like', 'post_comment'));
     }
+
+    //サブカテゴリーIDでの直接絞り込み（クリック対応）
+    if ($request->filled('sub_category_id')) {
+        $query->where('post_category_id', $request->sub_category_id);
+    }
+
+    //いいね投稿だけ
+    if ($request->filled('like_posts')) {
+        $likes = Auth::user()->likePostId()->pluck('like_post_id');
+        $query->whereIn('id', $likes);
+    }
+
+    //自分の投稿
+    if ($request->filled('my_posts')) {
+        $query->where('user_id', Auth::id());
+    }
+
+    $posts = $query->get();
+    $categories = MainCategory::with('subCategories')->get();
+    $like = new Like;
+    $post_comment = new Post;
+
+    return view('authenticated.bulletinboard.posts', compact('posts', 'categories', 'like', 'post_comment'));
+}
 
     public function toggleLike(Request $request)
 {
@@ -120,8 +141,16 @@ class PostsController extends Controller
         return redirect()->route('post.show');
     }
 
-    public function mainCategoryCreate(Request $request){
+    public function mainCategoryCreate(MaincategoryFormRequest $request){
         MainCategory::create(['main_category' => $request->main_category_name]);
+        return redirect()->route('post.input');
+    }
+
+    public function subCategoryCreate(SubcategoryFormRequest $request){
+        SubCategory::create([
+            'main_category_id' => $request->main_category_id,
+            'sub_category' => $request->sub_category_name,
+        ]);
         return redirect()->route('post.input');
     }
 
