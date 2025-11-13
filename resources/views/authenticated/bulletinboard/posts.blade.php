@@ -55,7 +55,8 @@
     <ul class="sub_category_list" id="sub-list-{{ $category->id }}" style="display: none; margin-left: 1rem;">
       @foreach($category->subCategories as $sub)
       <li>
-        <button type="submit" name="category_word" value="{{ $sub->sub_category }}" class="btn btn-link p-0">
+<button type="submit" name="sub_category_id" value="{{ $sub->id }}" class="btn btn-link p-0">
+
           {{ $sub->sub_category }}
         </button>
       </li>

@@ -45,13 +45,14 @@ class Post extends Model
     /**
      * 投稿に紐づくサブカテゴリー（多対多）
      */
-    public function subCategories()
-    {
-        return $this->belongsToMany(
-            SubCategory::class,   // 関連モデル
-            'post_sub_categories',// 中間テーブル
-            'post_id',            // 中間テーブルの投稿ID
-            'sub_category_id'     // 中間テーブルのサブカテゴリーID
-        );
-    }
+    public function subCategory()
+{
+    return $this->belongsToMany(
+        SubCategory::class,
+        'post_sub_categories',
+        'post_id',
+        'sub_category_id'
+    )->limit(1);
+}
+
 }
