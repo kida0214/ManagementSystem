@@ -3,6 +3,8 @@
 namespace App\Models\Posts;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Categories\SubCategory;
+use App\Models\Users\User;
 
 class Post extends Model
 {
@@ -15,25 +17,41 @@ class Post extends Model
         'post',
     ];
 
-    public function user(){
-        return $this->belongsTo('App\Models\Users\User');
+    /**
+     * 投稿したユーザー
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
+    /**
+     * 投稿に紐づくコメント
+     */
     public function postComments()
     {
-        return $this->hasMany('App\Models\Posts\PostComment');
+        return $this->hasMany(PostComment::class);
     }
 
-    // 投稿へのいいね
+    /**
+     * 投稿への「いいね」
+     * Likeモデルの外部キーは like_post_id、Postの主キーは id
+     */
     public function likes()
     {
-        // Likeモデルの外部キーはlike_post_id、Postの主キーはid
-        return $this->hasMany('App\Models\Posts\Like', 'like_post_id', 'id');
+        return $this->hasMany(Like::class, 'like_post_id', 'id');
     }
 
-    // 必要に応じて他のリレーションもここに
-    public function subCategory()
-{
-    return $this->belongsTo(\App\Models\Categories\SubCategory::class, 'post_sub_category_id');
-}
+    /**
+     * 投稿に紐づくサブカテゴリー（多対多）
+     */
+    public function subCategories()
+    {
+        return $this->belongsToMany(
+            SubCategory::class,   // 関連モデル
+            'post_sub_categories',// 中間テーブル
+            'post_id',            // 中間テーブルの投稿ID
+            'sub_category_id'     // 中間テーブルのサブカテゴリーID
+        );
+    }
 }

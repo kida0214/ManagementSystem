@@ -20,7 +20,7 @@ class PostsController extends Controller
 {
     public function show(Request $request)
 {
-    $query = Post::with('user', 'postComments', 'subCategory');
+    $query = Post::with('user', 'postComments', 'subCategories'); // 複数形に変更
 
     //キーワード検索（サブカテゴリ名と一致したらそれで絞る）
     if ($request->filled('keyword')) {
@@ -100,13 +100,18 @@ class PostsController extends Controller
     }
 
     public function postCreate(PostFormRequest $request){
-        $post = Post::create([
-            'user_id' => Auth::id(),
-            'post_title' => $request->post_title,
-            'post' => $request->post_body
-        ]);
-        return redirect()->route('post.show');
-    }
+    // 投稿作成
+    $post = Post::create([
+        'user_id' => Auth::id(),
+        'post_title' => $request->post_title,
+        'post' => $request->post_body
+    ]);
+
+    // サブカテゴリーを1つだけ紐付け
+    $post->subCategories()->sync([$request->sub_category_id]);
+
+    return redirect()->route('post.show');
+}
 
     public function postEdit(PostFormRequest $request){
         $request->validate([

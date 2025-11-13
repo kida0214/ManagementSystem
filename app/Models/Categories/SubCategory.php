@@ -26,7 +26,7 @@ class SubCategory extends Model
      * 投稿とのリレーション（サブカテゴリが紐づく投稿）
      */
     public function posts()
-    {
-        return $this->hasMany(\App\Models\Posts\Post::class, 'post_category_id');
-    }
+{
+    return $this->hasMany(\App\Models\Posts\Post::class, 'post_sub_category_id');
+}
 }
