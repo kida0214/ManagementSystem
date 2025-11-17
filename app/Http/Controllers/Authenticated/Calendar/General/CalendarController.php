@@ -6,10 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Calendars\General\CalendarView;
 use App\Models\Calendars\ReserveSettings;
-use App\Models\Calendars\Calendar;
-use App\Models\USers\User;
-use Auth;
-use DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CalendarController extends Controller
 {
@@ -20,19 +18,65 @@ class CalendarController extends Controller
 
     public function reserve(Request $request){
         DB::beginTransaction();
+
         try{
-            $getPart = $request->getPart;
-            $getDate = $request->getData;
-            $reserveDays = array_filter(array_combine($getDate, $getPart));
-            foreach($reserveDays as $key => $value){
-                $reserve_settings = ReserveSettings::where('setting_reserve', $key)->where('setting_part', $value)->first();
-                $reserve_settings->decrement('limit_users');
-                $reserve_settings->users()->attach(Auth::id());
+            $dates = $request->getData;   // ['2025-01-01', '2025-01-02', ...]
+            $parts = $request->getPart;   // ['1', '', '3', ...] 空が混じる
+
+            $reserveDays = [];
+
+            // -------------------------------
+            // ★ array_combine を使わない安全実装
+            // -------------------------------
+            foreach ($dates as $index => $date) {
+
+                $part = $parts[$index] ?? null;
+
+                // 空データは無視（hidden 等）
+                if (empty($date) || empty($part)) {
+                    continue;
+                }
+
+                // 正常データだけまとめる
+                $reserveDays[] = [
+                    'date' => $date,
+                    'part' => $part
+                ];
             }
+
+            // -------------------------------
+            // ★ 予約処理
+            // -------------------------------
+            foreach ($reserveDays as $reserve) {
+
+                $setting = ReserveSettings::where('setting_reserve', $reserve['date'])
+                                          ->where('setting_part', $reserve['part'])
+                                          ->first();
+
+                // 念のため null チェック
+                if (!$setting) continue;
+
+                // limit_users を1減らす
+                $setting->decrement('limit_users');
+
+                // 多重登録防止（attach 前に exists チェック）
+                if (!$setting->users()->where('user_id', Auth::id())->exists()) {
+                    $setting->users()->attach(Auth::id());
+                }
+            }
+
             DB::commit();
-        }catch(\Exception $e){
+
+        } catch (\Exception $e) {
+
             DB::rollback();
+            return redirect()
+                ->back()
+                ->with('error', '予約処理中にエラーが発生しました');
         }
-        return redirect()->route('calendar.general.show', ['user_id' => Auth::id()]);
+
+        return redirect()->route('calendar.general.show', [
+            'user_id' => Auth::id()
+        ]);
     }
 }

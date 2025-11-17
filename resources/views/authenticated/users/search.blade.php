@@ -2,6 +2,7 @@
   <p>ユーザー検索</p>
 
   <div class="search_content w-100 border d-flex">
+
     {{-- ユーザー一覧 --}}
     <div class="reserve_users_area">
       @foreach($users as $user)
@@ -111,17 +112,19 @@
           </div>
 
           {{-- 選択科目 --}}
+          @php
+              $selectedSubjects = $selectedSubjects ?? []; // nullの場合は空配列
+          @endphp
           <div class="selected_engineer">
             <label>選択科目</label>
             <div>
-              <span>国語</span>
-              <input type="radio" name="subject" value="1" form="userSearchRequest">
-
-              <span>数学</span>
-              <input type="radio" name="subject" value="2" form="userSearchRequest">
-
-              <span>英語</span>
-              <input type="radio" name="subject" value="3" form="userSearchRequest">
+              @foreach($allSubjects as $subject)
+                <label>
+                  <input type="checkbox" name="subjects[]" value="{{ $subject->id }}" form="userSearchRequest"
+                    {{ in_array($subject->id, $selectedSubjects) ? 'checked' : '' }}>
+                  {{ $subject->subject }}
+                </label>
+              @endforeach
             </div>
           </div>
 

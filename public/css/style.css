@@ -277,3 +277,14 @@ li {
 .subject_inner {
   display: none;
 }
+
+/* 全過去日（ベース：濃い） */
+.past-day-general {
+  background-color: #cccccc;
+  opacity: 0.8;
+}
+
+/* 今月の過去日（薄い） */
+.past-day-current-month {
+  background-color: #e9e9e9;
+}
